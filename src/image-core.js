@@ -1,6 +1,6 @@
 export const DPI = 300;
-export const MAX_PIXELS = 20_000_000;
-export const MAX_BYTES = 25 * 1024 * 1024;
+export const MAX_PIXELS = 100_000_000;
+export const MAX_BYTES = 200 * 1024 * 1024;
 const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 const crcTable = Uint32Array.from({ length: 256 }, (_, n) => {
   for (let k = 0; k < 8; k++) n = n & 1 ? 0xedb88320 ^ (n >>> 1) : n >>> 1;
@@ -84,7 +84,7 @@ export function dimensionsForPrint(width, height, mode, widthCm) {
     outWidth = Math.max(1, Math.round(widthCm / 2.54 * DPI));
     outHeight = Math.max(1, Math.round(outWidth * height / width));
   } else if (mode !== 'pixels') throw new Error('Selecciona un modo de tamaño válido.');
-  if (outWidth * outHeight > MAX_PIXELS) throw new Error('La salida supera 20 megapíxeles. Reduce el ancho para preparar este archivo en el navegador.');
+  if (outWidth * outHeight > MAX_PIXELS || Math.max(outWidth, outHeight) > 32767) throw new Error('La salida supera 100 megapíxeles o el límite de lado del navegador. Reduce el ancho de salida.');
   return { width: outWidth, height: outHeight, widthCm: outWidth / DPI * 2.54, heightCm: outHeight / DPI * 2.54, scale: outWidth / width };
 }
 
@@ -173,7 +173,7 @@ export function inspectHeader(bytes) {
     if (chunks.some(c => c.type === 'acTL')) throw new Error('Usa un PNG fijo; esta versión no procesa animaciones.');
     if (header[8] === 16) throw new Error('Esta versión admite PNG de 8 bits. Convierte el PNG de 16 bits antes de cargarlo.');
     const h = new DataView(header.buffer, header.byteOffset, header.byteLength);
-    return { type: 'PNG', width: h.getUint32(0), height: h.getUint32(4), dpi: readPngDpi(bytes)?.x ?? null };
+    return { type: 'PNG', width: h.getUint32(0), height: h.getUint32(4), dpi: readPngDpi(bytes)?.x ?? null, hasExif:chunks.some(c=>c.type==='eXIf') };
   }
   if (bytes[0] === 255 && bytes[1] === 216) {
     let offset = 2;

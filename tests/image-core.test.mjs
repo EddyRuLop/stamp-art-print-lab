@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateSync, inflateSync } from 'node:zlib';
-import { crc32, packChunk, pngChunks, setPngDpi, readPngDpi, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, inspectHeader } from '../src/image-core.js';
+import { MAX_BYTES, MAX_PIXELS, crc32, packChunk, pngChunks, setPngDpi, readPngDpi, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, inspectHeader } from '../src/image-core.js';
 
 function fixture({ width = 2, height = 2, alpha = [0, 127, 128, 255], extra = [] } = {}) {
   const header = new Uint8Array(13);
@@ -98,7 +98,7 @@ test('Thirty centimetres maps to 3543 pixels and preserves aspect ratio by round
 });
 
 test('Pixel and memory limits apply to enlarged outputs and invalid sizes', () => {
-  assert.throws(()=>dimensionsForPrint(900,1050,'print',200),/20 megapíxeles/);
+  assert.throws(()=>dimensionsForPrint(900,1050,'print',200),/100 megapíxeles/);
   for (const width of [0,-1,NaN,Infinity]) assert.throws(()=>dimensionsForPrint(900,1050,'print',width));
   assert.throws(()=>dimensionsForPrint(100,100,'stretch',30));
 });
@@ -111,3 +111,10 @@ test('Header analysis reads dimensions and rejects malformed PNG and animations'
 });
 
 test('CRC matches the standard test vector',()=>assert.equal(crc32(new TextEncoder().encode('123456789')),0xcbf43926));
+
+test('Large artwork limits allow files above 25 MB and canvases above 20 MP',()=>{
+  assert.equal(MAX_BYTES,200*1024*1024);assert.equal(MAX_PIXELS,100_000_000);
+  assert.ok(50*1024*1024<MAX_BYTES);
+  assert.equal(dimensionsForPrint(6000,5000,'pixels',0).width,6000);
+  assert.throws(()=>dimensionsForPrint(11000,11000,'pixels',0));
+});
