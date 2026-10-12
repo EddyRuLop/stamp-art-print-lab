@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { DPI, MAX_BYTES, dimensionsForPrint } from './image-core.js';
 import './style.css';
+import VectorPanel from './VectorPanel.jsx';
 
 const format = n => new Intl.NumberFormat('es-MX').format(n);
 const cm = n => new Intl.NumberFormat('es-MX', { maximumFractionDigits: 2 }).format(n);
@@ -199,6 +200,7 @@ function App() {
         </aside>
       </div>
 
+      <VectorPanel/>
       <section id="about" className="about"><div className="about-title"><span className="eyebrow">PENSADO PARA TU TALLER</span><h2>Tú diseñas.<br/><span>Print Lab prepara.</span></h2></div><div className="about-items"><article><span>01</span><h3>Define el tamaño</h3><p>Conserva los píxeles o indica el ancho de impresión. Las proporciones siempre se mantienen.</p></article><article><span>02</span><h3>Revisa los bordes</h3><p>Compara el original y el resultado al 100%. Limpiar transparencias puede cambiar sombras y contornos.</p></article><article><span>03</span><h3>Descarga tu PNG</h3><p>El archivo lleva 300 DPI verificados. La calidad final depende del original y de la medida elegida.</p></article></div></section>
       <div className="tool-note"><Icon name="info" size={17}/><p>La eliminación por color funciona mejor con fondos lisos y puede borrar partes similares del diseño: revisa el resultado al 100%. El recorte automático por IA y los semitonos son los siguientes módulos. Las imágenes transformadas se exportan en el espacio de color del navegador; revisa el color y el acabado con tu proveedor de impresión.</p></div>
     </main>

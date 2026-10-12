@@ -1,4 +1,5 @@
 import { DPI, MAX_PIXELS, MAX_BYTES, inspectHeader, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, setPngDpi, readPngDpi } from './image-core.js';
+import { traceMask } from './vector-core.js';
 
 function progress(value, message) { self.postMessage({ type: 'progress', value, message }); }
 
@@ -15,7 +16,8 @@ self.onmessage = async ({ data: job }) => {
     bitmap = await createImageBitmap(job.file);
     const sourceWidth = bitmap.width, sourceHeight = bitmap.height;
     if (sourceWidth * sourceHeight > MAX_PIXELS) throw new Error('La imagen supera 20 megapíxeles.');
-    const dims = job.type === 'inspect' ? { width: sourceWidth, height: sourceHeight } : dimensionsForPrint(sourceWidth, sourceHeight, job.options.mode, job.options.widthCm);
+    const vectorScale = Math.min(1, 768 / Math.max(sourceWidth, sourceHeight));
+    const dims = job.type === 'vector' ? { width: Math.max(1, Math.round(sourceWidth*vectorScale)), height: Math.max(1,Math.round(sourceHeight*vectorScale)) } : job.type === 'inspect' ? { width: sourceWidth, height: sourceHeight } : dimensionsForPrint(sourceWidth, sourceHeight, job.options.mode, job.options.widthCm);
     canvas = new OffscreenCanvas(dims.width, dims.height);
     const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) throw new Error('No fue posible preparar el lienzo de la imagen.');
@@ -26,6 +28,12 @@ self.onmessage = async ({ data: job }) => {
     progress(20, 'Revisando los píxeles…');
     const image = context.getImageData(0, 0, dims.width, dims.height);
     const before = alphaStats(image.data);
+    if (job.type === 'vector') {
+      progress(35, 'Trazando contornos SVG…');
+      const vector = traceMask(image.data, dims.width, dims.height, { ...job.options, outputWidth: sourceWidth, outputHeight: sourceHeight });
+      self.postMessage({ type:'done', ...vector });
+      return;
+    }
     if (job.type === 'inspect') {
       self.postMessage({ type: 'done', info: { width: sourceWidth, height: sourceHeight, fileType: header.type, inputDpi: header.dpi, stats: before } });
       return;

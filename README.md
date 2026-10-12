@@ -16,6 +16,12 @@ Herramienta web para preparar archivos de impresión: definir medidas en centím
 - Cancelación del procesamiento y conservación del archivo original.
 - Diseño de prueba generado con vectores para explorar las funciones.
 
+## Vectorización SVG
+
+El apartado **Vectoriza logos y siluetas** convierte zonas claras u oscuras en trazados editables de un color. Selecciona una imagen, ajusta el umbral, invierte la selección si necesitas las zonas claras y elige el color de salida. El SVG conserva huecos y fondo transparente; no contiene una imagen PNG incrustada.
+
+El análisis reduce el lado mayor a un máximo de 768 píxeles. Los contornos siguen los bordes de esa cuadrícula, por lo que no es una vectorización artística de curvas ni una conversión completa de fotografías a color. Revisa el resultado en Inkscape; los detalles pequeños pueden perderse. El tamaño inicial del SVG equivale al lienzo original a 300 PPI. Un SVG usa medidas y trazados: no requiere metadatos DPI.
+
 ## Qué significa mejorar la calidad
 
 La interpolación crea píxeles intermedios al ampliar; la nitidez refuerza contraste que ya existe. No reconstruyen automáticamente detalle perdido. Cambiar solo DPI modifica la escala física de impresión, no añade píxeles.
@@ -93,7 +99,7 @@ El siguiente módulo será el recorte automático con IA ejecutado localmente. S
 ## Alcance y límites
 
 - No elimina todavía fondos complejos, personas u objetos mediante IA. JPG no incorpora canal alfa, pero puede convertirse a PNG transparente con la eliminación por color.
-- No vectoriza y no genera semitonos todavía.
+- Vectoriza siluetas de un color; la vectorización a color y los semitonos están pendientes.
 - La medida física incluye el lienzo completo, también sus márgenes transparentes.
 - El ajuste con umbral puede eliminar detalles tenues; convertir todo lo visible en opaco puede hacer visibles residuos.
 - Se admiten imágenes fijas. PNG de 16 bits y archivos animados se rechazan para evitar conversiones silenciosas.
@@ -112,4 +118,6 @@ Los archivos se leen en memoria y se descargan desde una URL local del navegador
 
 [Eduardo Ruiz — EddyRuLop](https://github.com/EddyRuLop)
 
-Proyecto inicial preparado con apoyo de ChatGPT para Stamp Art. Pendiente de conectar GitHub para publicar el repositorio personal.
+Proyecto preparado con apoyo de ChatGPT para Stamp Art. Repositorio: [EddyRuLop/stamp-art-print-lab](https://github.com/EddyRuLop/stamp-art-print-lab).
+
+La aplicación se puede usar sin Node.js desde [el acceso privado de Stamp Art](https://stamp-art-print-lab.eduardoyahel14743.chatgpt.site). Ese enlace requiere la cuenta de su propietario. Node.js solo es necesario para ejecutar o modificar el proyecto localmente.

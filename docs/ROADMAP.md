@@ -16,6 +16,8 @@ Herramienta privada de Stamp Art para preparar artes de impresión DTF sin subir
 
 ## Próximos módulos
 
+Se añadió vectorización SVG de un color con umbral, inversión, huecos y color configurable. La vectorización con curvas suavizadas y paleta múltiple será una ampliación posterior.
+
 1. **Recorte automático con IA local**: elegir un modelo con licencia apta para publicación, mostrar progreso de descarga del modelo y mantener el archivo en el equipo. Se probará con artes reales antes de integrarlo.
 2. **Semitonos DTF**: modos de puntos configurables y modo de quitar color sin puntos; controles de color, tolerancia, tamaño, densidad y vista previa.
 3. **Plantilla DTF**: cargar múltiples PNG, elegir ancho/alto, separación de 1 mm y acomodar sin escalar ni recomprimir los diseños.
@@ -38,7 +40,7 @@ npm run build
 
 ## Git y commits
 
-El repositorio en GitHub se llamará `stamp-art-print-lab`. Cuando la cuenta de GitHub esté conectada se subirá el código y los commits usarán mensajes claros, por ejemplo:
+El repositorio en GitHub es [EddyRuLop/stamp-art-print-lab](https://github.com/EddyRuLop/stamp-art-print-lab). Los commits usan mensajes por función, por ejemplo:
 
 ```text
 feat: agrega eliminación de fondo por color
