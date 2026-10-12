@@ -1,57 +1,31 @@
 # Roadmap de Stamp Art Print Lab
 
-## Propósito
+## Implementado — versión 2.0
 
-Herramienta privada de Stamp Art para preparar artes de impresión DTF sin subir los archivos de clientes a un servidor. La prioridad es conservar dimensiones, transparencia y control de salida para producción.
+- Pantalla de herramientas por tarjetas y navegación por apartados.
+- Biblioteca de archivos compartida con selección, eliminación y carga múltiple.
+- Hasta 200 MB por archivo y 100 MP por imagen; miniaturas reducidas.
+- PNG a 300 DPI, ajuste de centímetros y nitidez opcional por lotes.
+- Quitar color/fondo plano y limpieza de alfa por lotes.
+- Vectorización SVG de un color por lotes.
+- Descarga individual, descarga ZIP y reutilización de resultados PNG en DTF.
+- Plantilla DTF de 88 cm, largo automático, separación mínima de 1 mm, cantidades y margen exterior.
+- Conservación de dimensiones y bytes RGBA de PNG de 8 bits sin entrelazado/EXIF.
+- Exportación DTF por filas y preservación de perfiles PNG cuando son comunes a todos los diseños.
+- Pruebas de procesamiento, acomodo, conservación de píxeles y archivos ZIP.
 
-## Estado actual — versión 1.1
+## Siguientes módulos
 
-- Carga de PNG, JPG y WebP fijos (hasta 25 MB / 20 MP).
-- Salida PNG con metadato de 300 DPI comprobado.
-- Conversión a una medida física en centímetros, conservando proporción.
-- Interpolación de navegador y nitidez opcional.
-- Eliminación de semitransparencias mediante umbral u opacidad completa.
-- Quitar un color de fondo: blanco, negro, verde chroma o color manual; tolerancia y suavizado configurables.
-- Procesamiento local en el navegador; los diseños no se almacenan en la app.
+1. Recorte automático de objetos/fondos con un modelo local y licencia adecuada.
+2. Semitonos de impresión con parámetros de tamaño, frecuencia, ángulo y color de prenda.
+3. Vectorización a color y suavizado de curvas.
+4. Mockups de diferentes prendas y colores.
+5. Ajuste manual de posiciones DTF, giro opcional y exportación por páginas.
+6. Guardado local de sesiones y recuperación de proyectos.
+7. Pruebas con grandes archivos de producción y verificación visual de escritorio/móvil.
 
-## Próximos módulos
+## Flujo de desarrollo
 
-Se añadió vectorización SVG de un color con umbral, inversión, huecos y color configurable. La vectorización con curvas suavizadas y paleta múltiple será una ampliación posterior.
+El repositorio es [EddyRuLop/stamp-art-print-lab](https://github.com/EddyRuLop/stamp-art-print-lab). Los cambios se documentan y se suben con commits por función. Antes de entregar se ejecutan `npm test` y `npm run build`.
 
-1. **Recorte automático con IA local**: elegir un modelo con licencia apta para publicación, mostrar progreso de descarga del modelo y mantener el archivo en el equipo. Se probará con artes reales antes de integrarlo.
-2. **Semitonos DTF**: modos de puntos configurables y modo de quitar color sin puntos; controles de color, tolerancia, tamaño, densidad y vista previa.
-3. **Plantilla DTF**: cargar múltiples PNG, elegir ancho/alto, separación de 1 mm y acomodar sin escalar ni recomprimir los diseños.
-4. **Mockups**: catálogo de prendas y colores con zona imprimible configurable.
-5. **Producción**: selector de perfiles y pruebas visuales con archivos reales del taller.
-
-## Ejecutar localmente
-
-1. Instalar Node.js LTS desde <https://nodejs.org>.
-2. Abrir esta carpeta con VS Code.
-3. En la terminal integrada ejecutar `npm install`.
-4. Ejecutar `npm run dev` y abrir la dirección que indique Vite.
-
-Comprobaciones antes de cada entrega:
-
-```bash
-npm test
-npm run build
-```
-
-## Git y commits
-
-El repositorio en GitHub es [EddyRuLop/stamp-art-print-lab](https://github.com/EddyRuLop/stamp-art-print-lab). Los commits usan mensajes por función, por ejemplo:
-
-```text
-feat: agrega eliminación de fondo por color
-test: cubre tolerancia de eliminación de color
-docs: documenta flujo local y roadmap
-```
-
-No se agregarán archivos de clientes, resultados de producción ni claves al repositorio.
-
-## Decisiones de privacidad y licencia
-
-- No se usan APIs de pago en la versión actual.
-- El recorte por color se ejecuta completamente en el navegador.
-- La primera alternativa evaluada para IA automática fue descartada porque utiliza licencia AGPL; antes de publicar se seleccionará un modelo y librería compatibles con el uso futuro de Stamp Art.
+Los archivos de clientes y las credenciales no forman parte del repositorio. La app continúa siendo una herramienta del propietario y su publicación web mantiene acceso privado.
