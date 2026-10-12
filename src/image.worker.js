@@ -1,4 +1,4 @@
-import { DPI, MAX_PIXELS, MAX_BYTES, inspectHeader, dimensionsForPrint, alphaStats, cleanAlpha, sharpenRgba, setPngDpi, readPngDpi } from './image-core.js';
+import { DPI, MAX_PIXELS, MAX_BYTES, inspectHeader, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, setPngDpi, readPngDpi } from './image-core.js';
 
 function progress(value, message) { self.postMessage({ type: 'progress', value, message }); }
 
@@ -30,19 +30,23 @@ self.onmessage = async ({ data: job }) => {
       self.postMessage({ type: 'done', info: { width: sourceWidth, height: sourceHeight, fileType: header.type, inputDpi: header.dpi, stats: before } });
       return;
     }
-    const { alphaMode, threshold, sharpen, strength } = job.options;
+    const { alphaMode, threshold, sharpen, strength, backgroundMode = 'none', backgroundColor = '#ffffff', backgroundTolerance = 24, backgroundFeather = 0 } = job.options;
+    if (backgroundMode === 'color') {
+      progress(24, 'Quitando el color de fondo…');
+      removeColor(image.data, backgroundColor, backgroundTolerance, backgroundFeather, v => progress(24 + Math.round(v * 30), 'Quitando el color de fondo…'));
+    } else if (backgroundMode !== 'none') throw new Error('El modo de quitar fondo no es válido.');
     if (sharpen) {
-      progress(25, 'Ajustando la nitidez…');
-      sharpenRgba(image.data, dims.width, dims.height, strength / 100, v => progress(25 + Math.round(v * 35), 'Ajustando la nitidez…'));
+      progress(55, 'Ajustando la nitidez…');
+      sharpenRgba(image.data, dims.width, dims.height, strength / 100, v => progress(55 + Math.round(v * 20), 'Ajustando la nitidez…'));
     }
-    progress(65, 'Preparando la transparencia…');
-    cleanAlpha(image.data, alphaMode, threshold, v => progress(65 + Math.round(v * 12), 'Preparando la transparencia…'));
+    progress(76, 'Preparando la transparencia…');
+    cleanAlpha(image.data, alphaMode, threshold, v => progress(76 + Math.round(v * 8), 'Preparando la transparencia…'));
     const after = alphaStats(image.data);
     if (alphaMode !== 'keep' && after.semi !== 0) throw new Error('No se pudo verificar la limpieza de transparencia.');
-    progress(80, 'Guardando el PNG…');
+    progress(85, 'Guardando el PNG…');
     let png;
     // Metadata-only PNG export does not decode/re-encode or alter the original IDAT/color profile.
-    const metadataOnly = header.type === 'PNG' && job.options.mode === 'pixels' && !sharpen && alphaMode === 'keep' && sourceWidth === header.width && sourceHeight === header.height;
+    const metadataOnly = header.type === 'PNG' && job.options.mode === 'pixels' && !sharpen && alphaMode === 'keep' && backgroundMode === 'none' && sourceWidth === header.width && sourceHeight === header.height;
     if (metadataOnly) {
       png = setPngDpi(bytes, DPI);
     } else {

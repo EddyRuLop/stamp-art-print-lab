@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateSync, inflateSync } from 'node:zlib';
-import { crc32, packChunk, pngChunks, setPngDpi, readPngDpi, dimensionsForPrint, alphaStats, cleanAlpha, sharpenRgba, inspectHeader } from '../src/image-core.js';
+import { crc32, packChunk, pngChunks, setPngDpi, readPngDpi, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, inspectHeader } from '../src/image-core.js';
 
 function fixture({ width = 2, height = 2, alpha = [0, 127, 128, 255], extra = [] } = {}) {
   const header = new Uint8Array(13);
@@ -65,6 +65,16 @@ test('Keep mode is byte-identical and invalid thresholds are rejected', () => {
   cleanAlpha(data,'keep');assert.deepEqual(data,original);
   assert.throws(()=>cleanAlpha(data,'threshold',0));
   assert.throws(()=>cleanAlpha(data,'unsupported'));
+});
+
+test('Removing a selected colour respects tolerance and preserves other RGB values', () => {
+  const data = new Uint8ClampedArray([255,255,255,255, 245,248,250,200, 0,0,0,255]);
+  removeColor(data, '#ffffff', 0, 20);
+  assert.equal(data[3], 0);
+  assert.ok(data[7] > 0 && data[7] < 200);
+  assert.equal(data[11], 255);
+  assert.deepEqual([...data.subarray(8,11)], [0,0,0]);
+  assert.throws(() => removeColor(data, 'white'));
 });
 
 test('Sharpening cannot pull RGB from a transparent neighbour or modify alpha', () => {

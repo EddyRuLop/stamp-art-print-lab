@@ -1,6 +1,6 @@
 # Stamp Art · Print Lab
 
-Herramienta web para preparar archivos de impresión: definir medidas en centímetros, exportar PNG a 300 DPI, ampliar mediante interpolación, aplicar nitidez y eliminar semitransparencias. Procesa imágenes en el navegador sin enviar los archivos a un servidor.
+Herramienta web para preparar archivos de impresión: definir medidas en centímetros, exportar PNG a 300 DPI, ampliar mediante interpolación, aplicar nitidez, quitar fondos de color sólido y eliminar semitransparencias. Procesa imágenes en el navegador sin enviar los archivos a un servidor.
 
 ## Funciones de la primera versión
 
@@ -10,6 +10,7 @@ Herramienta web para preparar archivos de impresión: definir medidas en centím
 - Proporciones bloqueadas y altura calculada automáticamente.
 - Ampliación mediante interpolación del navegador y máscara de enfoque opcional.
 - Tres modos de transparencia: conservar, umbral y opacidad completa de todo lo visible.
+- Eliminación local de fondo por color: blanco, negro, verde chroma o color personalizado, con tolerancia y suavizado de borde.
 - Vista del original y resultado sobre fondos de cuadros, blanco u oscuro; zoom 100% y 200%.
 - Descarga PNG con bloque `pHYs` de 300 DPI y verificación de su densidad.
 - Cancelación del procesamiento y conservación del archivo original.
@@ -81,10 +82,18 @@ En un PNG con **Conservar píxeles**, sin nitidez y con transparencia conservada
 
 El orden del tratamiento es decodificar, redimensionar, aplicar nitidez, limpiar alfa y exportar. La limpieza de alfa es posterior al redimensionado para evitar que éste introduzca nuevas semitransparencias después del filtro.
 
+## Quitar fondo
+
+La versión 1.1 incluye **quitar un color de fondo**, no un recorte automático de personas u objetos. Elige el color exacto, aumenta la tolerancia solo hasta que desaparezca el fondo y ajusta el suavizado si el borde queda escalonado. Después, selecciona **Limpiar con umbral** si el proveedor requiere que el PNG no tenga semitransparencias.
+
+No elimina únicamente el fondo por posición: cualquier parte del diseño parecida al color elegido también puede quedar transparente. Por eso es ideal para fondos planos y para el flujo de quitar negro/blanco que se usa antes de crear semitonos.
+
+El siguiente módulo será el recorte automático con IA ejecutado localmente. Se elegirá un modelo con licencia compatible con publicar la herramienta; no se integrará una API de pago ni un modelo que obligue a abrir el código de una futura versión comercial.
+
 ## Alcance y límites
 
-- No elimina fondos blancos o sólidos. JPG no incorpora canal alfa; debe llegar con el fondo retirado si necesitas transparencia.
-- No usa IA, no vectoriza y no genera semitonos.
+- No elimina todavía fondos complejos, personas u objetos mediante IA. JPG no incorpora canal alfa, pero puede convertirse a PNG transparente con la eliminación por color.
+- No vectoriza y no genera semitonos todavía.
 - La medida física incluye el lienzo completo, también sus márgenes transparentes.
 - El ajuste con umbral puede eliminar detalles tenues; convertir todo lo visible en opaco puede hacer visibles residuos.
 - Se admiten imágenes fijas. PNG de 16 bits y archivos animados se rechazan para evitar conversiones silenciosas.
@@ -103,4 +112,4 @@ Los archivos se leen en memoria y se descargan desde una URL local del navegador
 
 [Eduardo Ruiz — EddyRuLop](https://github.com/EddyRuLop)
 
-Proyecto inicial preparado con apoyo de ChatGPT para Stamp Art. No se ha publicado en la cuenta personal de GitHub.
+Proyecto inicial preparado con apoyo de ChatGPT para Stamp Art. Pendiente de conectar GitHub para publicar el repositorio personal.

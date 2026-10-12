@@ -111,6 +111,24 @@ export function cleanAlpha(data, mode, threshold = 128, progress = () => {}) {
   progress(1);
 }
 
+/** Makes a selected RGB colour transparent while preserving its original alpha. */
+export function removeColor(data, hex, tolerance = 24, feather = 0, progress = () => {}) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) throw new Error('Selecciona un color de fondo válido.');
+  if (!Number.isFinite(tolerance) || tolerance < 0 || tolerance > 441) throw new Error('La tolerancia de color no es válida.');
+  if (!Number.isFinite(feather) || feather < 0 || feather > 255) throw new Error('El suavizado de borde no es válido.');
+  const target = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  const step = Math.max(4, Math.floor(data.length / 40 / 4) * 4);
+  for (let i = 0; i < data.length; i += 4) {
+    const distance = Math.hypot(data[i] - target[0], data[i + 1] - target[1], data[i + 2] - target[2]);
+    let keep = 1;
+    if (distance <= tolerance) keep = 0;
+    else if (feather > 0 && distance < tolerance + feather) keep = (distance - tolerance) / feather;
+    if (keep < 1) data[i + 3] = Math.round(data[i + 3] * keep);
+    if (i % step === 0) progress(i / data.length);
+  }
+  progress(1);
+}
+
 /** Alpha-aware 3x3 unsharp mask. RGB in transparent neighbours cannot introduce dark edges. */
 export function sharpenRgba(data, width, height, strength, progress = () => {}) {
   if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error('La nitidez debe estar entre 0 y 1.');
