@@ -1,6 +1,6 @@
 # Roadmap de Stamp Art Print Lab
 
-## Implementado — versión 2.0
+## Implementado — versión 2.1
 
 - Pantalla de herramientas por tarjetas y navegación por apartados.
 - Biblioteca de archivos compartida con selección, eliminación y carga múltiple.
@@ -14,15 +14,17 @@
 - Exportación DTF por filas y preservación de perfiles PNG cuando son comunes a todos los diseños.
 - Pruebas de procesamiento, acomodo, conservación de píxeles y archivos ZIP.
 
+- Diseños de muestra y recuperación de una sesión guardada en el navegador.
+- Semitonos con frecuencia, ángulo y color de prenda.
+- Vectorización por paleta de hasta ocho colores y mockups de playera o totebag.
+- Ajuste manual de posición por pieza DTF con validación de separación y límites.
+
 ## Siguientes módulos
 
-1. Recorte automático de objetos/fondos con un modelo local y licencia adecuada.
-2. Semitonos de impresión con parámetros de tamaño, frecuencia, ángulo y color de prenda.
-3. Vectorización a color y suavizado de curvas.
-4. Mockups de diferentes prendas y colores.
-5. Ajuste manual de posiciones DTF, giro opcional y exportación por páginas.
-6. Guardado local de sesiones y recuperación de proyectos.
-7. Pruebas con grandes archivos de producción y verificación visual de escritorio/móvil.
+1. Recorte automático de fondos mediante un modelo local con licencia adecuada.
+2. Suavizado de curvas en los SVG de paleta.
+3. Giro opcional de las piezas DTF y exportación en varias páginas.
+4. Verificación con pedidos reales y distintos dispositivos de impresión.
 
 ## Flujo de desarrollo
 

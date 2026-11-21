@@ -49,4 +49,19 @@ El área transparente de cada archivo ocupa espacio. No se recorta automáticame
 - Las miniaturas son reducidas; no representan una pérdida de resolución del archivo descargado.
 - DTF conserva el alfa de origen: si necesitas que todo sea 0 o 255, limpia los archivos antes.
 - Si la exportación muestra un aviso sobre perfiles de color, realiza una prueba con tu proveedor.
-- Descarga antes de recargar o cerrar la página: los diseños no se guardan de forma permanente.
+- Descarga los resultados antes de recargar. Para conservar tus archivos de origen, selección y ajustes, guarda una sesión desde la biblioteca.
+
+
+## Probar y guardar una sesión
+
+Usa **Cargar diseños de muestra** para probar el taller. **Guardar sesión en este navegador** guarda los diseños originales con su selección y ajustes. Para recuperarlos, deja la biblioteca vacía y pulsa **Recuperar sesión**. El guardado sustituye la sesión anterior. Usa **Borrar sesión guardada** para eliminarla del dispositivo.
+
+## Semitonos, SVG a color y mockups
+
+- En **Semitonos**, elige frecuencia entre 15 y 75 LPI, ángulo y color de prenda. El resultado conserva el tamaño y usa alfa binario. Comprueba la trama con una impresión de prueba.
+- En **Vectorizar SVG**, la opción de paleta crea trazados de hasta ocho colores planos. Funciona mejor con logos e ilustraciones de colores definidos.
+- En **Mockups**, elige playera o totebag, color y tamaño relativo del diseño. Descarga el PNG de 900 × 800 px para compartir la vista de referencia.
+
+## Ajuste manual de película
+
+Elige una copia desde **Ajustar posición manualmente**. Cambia X o Y en centímetros desde el borde superior izquierdo. El taller impide exportar cuando las piezas se enciman, incumplen la separación o salen del área útil. **Restaurar acomodo automático** descarta los ajustes manuales.

@@ -1,5 +1,7 @@
 import { DPI, MAX_PIXELS, MAX_BYTES, inspectHeader, dimensionsForPrint, alphaStats, cleanAlpha, removeColor, sharpenRgba, setPngDpi, readPngDpi } from './image-core.js';
-import { traceMask } from './vector-core.js';
+import { applySemitone } from './semitone.js';
+import { renderMockup } from './mockup.js';
+import { traceMask, tracePalette } from './vector-core.js';
 
 function progress(value, message) { self.postMessage({ type: 'progress', value, message }); }
 
@@ -16,6 +18,11 @@ self.onmessage = async ({ data: job }) => {
     bitmap = await createImageBitmap(job.file);
     const sourceWidth = bitmap.width, sourceHeight = bitmap.height;
     if (sourceWidth * sourceHeight > MAX_PIXELS) throw new Error('La imagen supera 100 megapíxeles.');
+    if (job.type === 'mockup') {
+      const blob = await renderMockup(bitmap, job.options);
+      self.postMessage({ type: 'done', blob });
+      return;
+    }
     const vectorScale = Math.min(1, 768 / Math.max(sourceWidth, sourceHeight));
     const thumbScale = Math.min(1,800/Math.max(sourceWidth,sourceHeight));
     const dims = job.type === 'inspect' ? { width:Math.max(1,Math.round(sourceWidth*thumbScale)),height:Math.max(1,Math.round(sourceHeight*thumbScale)) } : job.type === 'vector' ? { width: Math.max(1, Math.round(sourceWidth*vectorScale)), height: Math.max(1,Math.round(sourceHeight*vectorScale)) } : dimensionsForPrint(sourceWidth, sourceHeight, job.options.mode, job.options.widthCm);
@@ -31,7 +38,8 @@ self.onmessage = async ({ data: job }) => {
     const before = alphaStats(image.data);
     if (job.type === 'vector') {
       progress(35, 'Trazando contornos SVG…');
-      const vector = traceMask(image.data, dims.width, dims.height, { ...job.options, outputWidth: sourceWidth, outputHeight: sourceHeight });
+      const trace = job.options.colors > 1 ? tracePalette : traceMask;
+      const vector = trace(image.data, dims.width, dims.height, { ...job.options, outputWidth: sourceWidth, outputHeight: sourceHeight });
       self.postMessage({ type:'done', ...vector });
       return;
     }
@@ -45,6 +53,10 @@ self.onmessage = async ({ data: job }) => {
       progress(24, 'Quitando el color de fondo…');
       removeColor(image.data, backgroundColor, backgroundTolerance, backgroundFeather, v => progress(24 + Math.round(v * 30), 'Quitando el color de fondo…'));
     } else if (backgroundMode !== 'none') throw new Error('El modo de quitar fondo no es válido.');
+    if (job.type === 'semitone') {
+      applySemitone(image.data, dims.width, dims.height, job.options,
+        value => progress(22 + Math.round(value * 51), 'Generando la trama…'));
+    }
     if (sharpen) {
       progress(55, 'Ajustando la nitidez…');
       sharpenRgba(image.data, dims.width, dims.height, strength / 100, v => progress(55 + Math.round(v * 20), 'Ajustando la nitidez…'));
@@ -56,7 +68,7 @@ self.onmessage = async ({ data: job }) => {
     progress(85, 'Guardando el PNG…');
     let png;
     // Metadata-only PNG export does not decode/re-encode or alter the original IDAT/color profile.
-    const metadataOnly = header.type === 'PNG' && !header.hasExif && job.options.mode === 'pixels' && !sharpen && alphaMode === 'keep' && backgroundMode === 'none' && sourceWidth === header.width && sourceHeight === header.height;
+    const metadataOnly = job.type === 'process' && header.type === 'PNG' && !header.hasExif && job.options.mode === 'pixels' && !sharpen && alphaMode === 'keep' && backgroundMode === 'none' && sourceWidth === header.width && sourceHeight === header.height;
     if (metadataOnly) {
       png = setPngDpi(bytes, DPI);
     } else {

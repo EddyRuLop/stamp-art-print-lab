@@ -2,7 +2,7 @@
 
 Taller web para preparar diseños de impresión DTF. Carga varios archivos, trabaja por apartados y exporta PNG a 300 DPI, SVG o una plantilla DTF de largo automático. Todo el procesamiento se realiza en el dispositivo del usuario.
 
-**Versión 2.0:** herramientas por tarjetas y navegación lateral, carga múltiple de hasta 200 MB por archivo, procesamiento por lotes y acomodo DTF de 88 cm sin escalar los diseños.
+**Versión 2.1:** biblioteca compartida, lotes de hasta 200 MB por archivo, diseños de muestra, sesiones locales y acomodo DTF sin escalar los diseños.
 
 [Abrir aplicación privada](https://stamp-art-print-lab.eduardoyahel14743.chatgpt.site) · [Repositorio](https://github.com/EddyRuLop/stamp-art-print-lab) · [Guía de uso](docs/USO.md) · [Roadmap](docs/ROADMAP.md)
 
@@ -15,8 +15,10 @@ El acceso web requiere la cuenta de su propietario. Node.js solo es necesario pa
 | Tamaño y 300 DPI | Conservar píxeles o definir ancho en cm, altura proporcional y nitidez opcional | PNG |
 | Quitar fondo | Eliminar blanco, negro o un color personalizado con tolerancia y suavizado | PNG transparente |
 | Semitransparencias | Conservar alfa, limpiar con umbral o hacer opaco todo lo visible | PNG a 300 DPI |
-| Vectorizar SVG | Trazar zonas oscuras/claras en un color, conservando huecos | SVG con trazados |
-| Crear plantilla DTF | Acomodar diseños y cantidades en 88 cm, separación mínima de 1 mm y largo automático | PNG transparente a 300 DPI |
+| Vectorizar SVG | Trazar siluetas o crear hasta 8 capas de color, conservando huecos | SVG con trazados |
+| Semitonos | Aplicar trama según frecuencia, ángulo y color de prenda | PNG a 300 DPI |
+| Mockups | Previsualizar sobre playera o totebag en un color elegido | PNG de referencia |
+| Crear plantilla DTF | Acomodar diseños y cantidades en 88 cm, separación mínima de 1 mm, largo automático y ajuste manual | PNG transparente a 300 DPI |
 
 La biblioteca de diseños se comparte entre apartados. Selecciona los archivos que quieras procesar. Los resultados pueden descargarse por separado, en ZIP o reutilizarse en la plantilla DTF. Las miniaturas están reducidas para evitar decodificar todos los archivos originales simultáneamente.
 

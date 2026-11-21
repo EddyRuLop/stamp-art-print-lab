@@ -6,7 +6,7 @@ export const cmToPixels = cm => Math.round(cm / 2.54 * DPI);
 export const pixelsToCm = pixels => pixels / DPI * 2.54;
 
 /** Lowest skyline placement. No resizing or rotation; two orders compete for shortest sheet. */
-export function packDtf(items, { widthCm = 88, gapMm = 1, marginMm = 1, maxHeightCm = 0 } = {}) {
+export function packDtf(items, { widthCm = 88, gapMm = 1, marginMm = 1, maxHeightCm = 0, positions = {} } = {}) {
   if (!Number.isFinite(widthCm) || widthCm < 1 || widthCm > 200) throw new Error('El ancho debe estar entre 1 y 200 cm.');
   if (!Number.isFinite(gapMm) || gapMm < 1 || gapMm > 20 || !Number.isFinite(marginMm) || marginMm < 0 || marginMm > 50) throw new Error('Usa separación de 1 a 20 mm y margen de 0 a 50 mm.');
   if (!Number.isFinite(maxHeightCm) || maxHeightCm < 0 || maxHeightCm > 5000) throw new Error('El largo máximo no es válido.');
@@ -49,6 +49,25 @@ export function packDtf(items, { widthCm = 88, gapMm = 1, marginMm = 1, maxHeigh
   const a=place(expanded.slice().sort((a,b)=>b.height-a.height || b.width-a.width));
   const b=place(expanded.slice().sort((a,b)=>b.width*b.height-a.width*a.height || b.height-a.height));
   const result=a.height<=b.height?a:b;
+  if (Object.keys(positions).length) {
+    result.placements = result.placements.map(piece => {
+      const position = positions[`${piece.id}:${piece.copy}`];
+      return position ? { ...piece, x: position.x, y: position.y } : piece;
+    });
+    for (const [index, piece] of result.placements.entries()) {
+      if (!Number.isInteger(piece.x) || !Number.isInteger(piece.y) || piece.x < margin ||
+          piece.y < margin || piece.x + piece.width > width - margin) {
+        throw new Error('Hay una pieza fuera del área útil de la película.');
+      }
+      for (const other of result.placements.slice(0, index)) {
+        if (piece.x < other.x + other.width + gap && other.x < piece.x + piece.width + gap &&
+            piece.y < other.y + other.height + gap && other.y < piece.y + piece.height + gap) {
+          throw new Error('Dos piezas se enciman o quedan demasiado cerca. Respeta la separación mínima.');
+        }
+      }
+    }
+    result.height = Math.max(...result.placements.map(piece => piece.y + piece.height)) + margin;
+  }
   if(maxHeightCm>0 && result.height>cmToPixels(maxHeightCm)) throw new Error(`El acomodo ocupa ${pixelsToCm(result.height).toFixed(2)} cm y supera el largo máximo. Reduce piezas o aumenta el largo.`);
   if(width*result.height>DTF_MAX_OUTPUT_PIXELS) throw new Error('La plantilla supera 500 megapíxeles. Divide el pedido en dos plantillas.');
   return { ...result, width, widthCm:pixelsToCm(width), heightCm:pixelsToCm(result.height), gap, margin, pieces:expanded.length, utilization:expanded.reduce((sum,item)=>sum+item.width*item.height,0)/(width*result.height) };

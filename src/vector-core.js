@@ -10,6 +10,10 @@ export function traceMask(data, width, height, { threshold = 128, invert = false
     if (data[i+3] >= alphaThreshold && (invert ? !dark : dark)) { mask[p] = 1; selected++; }
   }
   if (!selected) throw new Error('No hay zonas seleccionadas. Cambia el umbral o activa invertir.');
+  return traceBinaryMask(mask, width, height, color, outputWidth, outputHeight, selected);
+}
+
+function traceBinaryMask(mask, width, height, color, outputWidth, outputHeight, selected) {
   const edges = new Map();
   const key = (x,y) => y * (width+1) + x;
   const add = (x,y,ex,ey,dir) => { const k=key(x,y); const list=edges.get(k)||[]; list.push({ x,y,ex,ey,dir }); edges.set(k,list); };
@@ -41,5 +45,47 @@ export function traceMask(data, width, height, { threshold = 128, invert = false
     paths.push('M'+points.map(p=>p.join(' ')).join('L')+'Z');
   }
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${(outputWidth/300*25.4).toFixed(4)}mm" height="${(outputHeight/300*25.4).toFixed(4)}mm" viewBox="0 0 ${width} ${height}"><path fill="${color}" fill-rule="evenodd" d="${paths.join('')}"/></svg>`;
-  return { svg, contours:paths.length, selected, width:outputWidth, height:outputHeight };
+  return { svg, path: paths.join(''), contours:paths.length, selected, width:outputWidth, height:outputHeight };
+}
+
+/** Quantize opaque pixels before tracing one editable layer per palette colour. */
+export function tracePalette(data, width, height, { colors, outputWidth, outputHeight }) {
+  if (!Number.isInteger(colors) || colors < 2 || colors > 8 ||
+      width * height > 600000 || data.length !== width * height * 4) {
+    throw new Error('Usa una paleta de 2 a 8 colores.');
+  }
+  const buckets = new Map();
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 128) continue;
+    const key = (data[i] >> 5) * 64 + (data[i + 1] >> 5) * 8 + (data[i + 2] >> 5);
+    const bucket = buckets.get(key) ?? { count: 0, rgb: [0, 0, 0] };
+    bucket.count++;
+    for (let c = 0; c < 3; c++) bucket.rgb[c] += data[i + c];
+    buckets.set(key, bucket);
+  }
+  const palette = [...buckets.values()].sort((a, b) => b.count - a.count)
+    .slice(0, colors).map(({count, rgb}) => rgb.map(value => Math.round(value / count)));
+  if (!palette.length) throw new Error('El diseño es transparente o no tiene suficiente opacidad.');
+  const masks = palette.map(() => new Uint8Array(width * height));
+  const counts = palette.map(() => 0);
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 128) continue;
+    let closest = 0, score = Infinity;
+    for (const [index, rgb] of palette.entries()) {
+      const distance = (data[i] - rgb[0]) ** 2 + (data[i + 1] - rgb[1]) ** 2 + (data[i + 2] - rgb[2]) ** 2;
+      if (distance < score) { score = distance; closest = index; }
+    }
+    masks[closest][i / 4] = 1;
+    counts[closest]++;
+  }
+  let contours = 0;
+  const layers = palette.flatMap((rgb, i) => {
+    if (!counts[i]) return [];
+    const color = '#' + rgb.map(value => value.toString(16).padStart(2, '0')).join('');
+    const traced = traceBinaryMask(masks[i], width, height, color, outputWidth, outputHeight, counts[i]);
+    contours += traced.contours;
+    return [`<path fill="${color}" fill-rule="evenodd" d="${traced.path}"/>`];
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${(outputWidth / 300 * 25.4).toFixed(4)}mm" height="${(outputHeight / 300 * 25.4).toFixed(4)}mm" viewBox="0 0 ${width} ${height}">${layers.join('')}</svg>`;
+  return { svg, contours, colors: layers.length };
 }
